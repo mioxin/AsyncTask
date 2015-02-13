@@ -44,7 +44,11 @@ public class MainActivity extends ActionBarActivity {
 //                    downloadFile(url);
 //                    publishProgress(++cnt);
 //                }
-                TimeUnit.SECONDS.sleep(5);
+                for (int i = 0; i < 5; i++) {
+                    TimeUnit.SECONDS.sleep(1);
+                    if (isCancelled()) return null;
+                    Log.d(LOG_TAG, "isCancelled: " + isCancelled());
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -54,14 +58,21 @@ public class MainActivity extends ActionBarActivity {
         @Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
-            tv.setText("Downloaded " + values[0] + " files");
+            tv.setText(tv.getText() + "\r\nDownloaded " + values[0] + " files");
         }
 
         @Override
         protected void onPostExecute(Integer result) {
             super.onPostExecute(result);
-            tv.setText("End. Result = " +result );
+            tv.setText(tv.getText() + "\r\nEnd. Result = " + result);
             Log.d(LOG_TAG,"End. Result = " +result);
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            tv.setText(tv.getText() + "\r\nCancel.");
+            Log.d(LOG_TAG, "Cancel");
         }
 
         private void downloadFile(String url) throws InterruptedException {
@@ -78,11 +89,17 @@ public class MainActivity extends ActionBarActivity {
                 mt.execute();
                 break;
             case R.id.button2:
-                showResult();
+                //showResult();
+                cancelTask();
                 break;
             default:
                 break;
         }
+    }
+
+    private void cancelTask() {
+        if (mt == null) return;
+        Log.d(LOG_TAG, "cancel result: " + mt.cancel(false));
     }
 
     private void showResult() {
